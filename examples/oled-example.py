@@ -1,34 +1,82 @@
-# This example is for use on (Linux) computers that are using CPython with
-# Adafruit Blinka to support CircuitPython libraries. CircuitPython does
-# not support PIL/pillow (python imaging library)!
-#
-# Ported to Pillow by Melissa LeBlanc-Williams for Adafruit Industries from Code available at:
-# https://learn.adafruit.com/adafruit-oled-displays-for-raspberry-pi/programming-your-display
+# SSD1306 Screen Example
+# Displays pixels, lines, shapes, and text to demonstrate displaying basics
+# Author: Laverena Wienclaw for TinyCircuits
 
-# Imports the necessary libraries...
+# Import all board pins.
+import time
 import board
-import digitalio
+import busio
+from digitalio import DigitalInOut
 from PIL import Image, ImageDraw, ImageFont
 import adafruit_ssd1306
 
-# Setting some variables for our reset pin etc.
-RESET_PIN = digitalio.DigitalInOut(board.D4)
+# Create the I2C interface.
+i2c = busio.I2C(board.SCL, board.SDA)
+# A reset line may be required if there is no auto-reset circuitry
+reset_pin = DigitalInOut(board.D5)
 
 import tinycircuits_wireling
-wireling = tinycircuits_wireling.Wireling()
-wireling.selectPort(0)
+wireling = tinycircuits_wireling.Wireling() # Enable and power Wireling Pi Hat
+wireling.selectPort(0) # Select ports 0-3
 
+# Create the SSD1306 OLED class.
+# The first two parameters are the pixel width and pixel height.  Change these
+# to the right size for your display!
+# The I2C address for these displays is 0x3d or 0x3c, change to match
+# A reset line may be required if there is no auto-reset circuitry
+display = adafruit_ssd1306.SSD1306_I2C(72, 40, i2c, addr=0x3c, reset=reset_pin) # 0.42" Screen
+#display = adafruit_ssd1306.SSD1306_I2C(96, 16, i2c, addr=0x3c, reset=reset_pin) # 0.69" Screen
+#display = adafruit_ssd1306.SSD1306_I2C(128, 64, i2c, addr=0x3c, reset=reset_pin) # 0.96" Screen
 
-# Very important... This lets py-gaugette 'know' what pins to use in order to reset the display
-i2c = board.I2C()
-oled = adafruit_ssd1306.SSD1306_I2C(96, 16, i2c, addr=0x3c, reset=RESET_PIN)
+# ----------------------------------------------------------
 
-# Clear display.
-oled.fill(0)
-oled.show()
+print("Pixel test")
+# Clear the display.  Always call show after changing pixels to make the display
+# update visible!
+display.fill(0)
+display.show()
 
+# Set a pixel in the origin 0,0 position.
+display.pixel(0, 0, 1)
+# Set a pixel in the middle position.
+display.pixel(display.width//2, display.height//2, 1)
+# Set a pixel in the opposite corner position.
+display.pixel(display.width-1, display.height-1, 1)
+display.show()
+time.sleep(1)
+
+# ----------------------------------------------------------
+
+print("Lines test")
+# we'll draw from corner to corner, lets define all the pair coordinates here
+corners = ((0, 0), (0, display.height-1), (display.width-1, 0),
+           (display.width-1, display.height-1))
+
+display.fill(0)
+for corner_from in corners:
+    for corner_to in corners:
+        display.line(corner_from[0], corner_from[1],
+                     corner_to[0], corner_to[1], 1)
+display.show()
+time.sleep(1)
+
+# ----------------------------------------------------------
+
+print("Rectangle test")
+display.fill(0)
+w_delta = display.width / 10
+h_delta = display.height / 10
+for i in range(11):
+    display.rect(0, 0, int(w_delta*i), int(h_delta*i), 1)
+display.show()
+time.sleep(1)
+
+# ----------------------------------------------------------
+
+print("Text test")
 # Create blank image for drawing.
-image = Image.new('1', (oled.width, oled.height))
+display.fill(0)
+image = Image.new('1', (display.width, display.height))
 draw = ImageDraw.Draw(image)
 
 # Load a font in 2 different sizes.
@@ -36,10 +84,10 @@ font = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf', 28)
 font2 = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf', 14)
 
 # Draw the text
-draw.text((0, 0), 'Hello!', font=font, fill=255)
-draw.text((0, 30), 'Hello!', font=font2, fill=255)
-draw.text((34, 46), 'Hello!', font=font2, fill=255)
+draw.text((0, 0), 'Hello!', font=font2, fill=255)
+#draw.text((0, 30), 'Hello!', font=font2, fill=255)
+#draw.text((34, 46), 'Hello!', font=font2, fill=255)
 
 # Display image
-oled.image(image)
-oled.show()
+display.image(image)
+display.show()
