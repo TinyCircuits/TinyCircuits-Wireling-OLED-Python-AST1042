@@ -12,12 +12,18 @@ import adafruit_ssd1306
 
 # Create the I2C interface.
 i2c = busio.I2C(board.SCL, board.SDA)
-# A reset line may be required if there is no auto-reset circuitry
-reset_pin = DigitalInOut(board.D5)
+
+# REQUIRED: A reset line to reset circuitry
+# Match the port you are using with one of the following variables
+Port0 = board.D10
+Port1 = board.D12
+Port2 = board.D18
+Port3 = board.D21
+reset_pin = DigitalInOut(Port0) # IMPORTANT: Select Port0-3
 
 import tinycircuits_wireling
 wireling = tinycircuits_wireling.Wireling() # Enable and power Wireling Pi Hat
-wireling.selectPort(0) # Select ports 0-3
+wireling.selectPort(0) # IMPORTANT: Select ports 0-3
 
 # Create the SSD1306 OLED class.
 # The first two parameters are the pixel width and pixel height.  Change these
