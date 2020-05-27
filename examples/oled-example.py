@@ -19,7 +19,7 @@ Port0 = board.D10
 Port1 = board.D12
 Port2 = board.D18
 Port3 = board.D21
-reset_pin = DigitalInOut(Port0) # IMPORTANT: Select Port0-3
+reset_pin = DigitalInOut(Port0) # IMPORTANT: Use variable Port0-3
 
 import tinycircuits_wireling
 wireling = tinycircuits_wireling.Wireling() # Enable and power Wireling Pi Hat
